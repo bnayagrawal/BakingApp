@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Baking App</string>
+    <string name="recipe_details">Recipe Details</string>
+    <string name="recipe_step_details">Recipe Step Details</string>
+    <string name="steps">Step</string>
+    <string name="video_not_available">Video not available for this step!</string>
+    <!-- main activity -->
+    <string name="loading">Loading&#8230;</string>
+    <string name="retry">Retry</string>
+    <string name="network_error">Please check your internet connection!</string>
+    <string name="error">Something went wrong!</string>
+    <string name="status_image_content_description">Status Icon</string>
+
+    <!-- Recipe card -->
+    <string name="recipe_image_content_description">Recipe Image</string>
+
+    <!-- Recipe details -->
+    <string name="ingredients">Ingredients</string>
+</resources>
