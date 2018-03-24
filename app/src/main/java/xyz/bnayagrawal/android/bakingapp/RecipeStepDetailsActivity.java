@@ -65,7 +65,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
         mFragmentRecipeStepDetails = new RecipeStepDetailsFragment();
         Step currentStep = mRecipe.getSteps().get(mCurrentStepNumber);
         bundle = new Bundle();
-        bundle.putBoolean(RecipeStepDetailsFragment.ARGUMENT_IS_PLAYED_IN_TABLET,isLandscape());
+        bundle.putBoolean(RecipeStepDetailsFragment.ARGUMENT_IS_PLAYED_IN_TABLET,false);
         bundle.putString(RecipeStepDetailsFragment.ARGUMENT_STEP_INSTRUCTION,currentStep.getDescription());
         bundle.putString(RecipeStepDetailsFragment.ARGUMENT_VIDEO_INSTRUCTION_URL,currentStep.getVideoURL());
         mFragmentRecipeStepDetails.setArguments(bundle);

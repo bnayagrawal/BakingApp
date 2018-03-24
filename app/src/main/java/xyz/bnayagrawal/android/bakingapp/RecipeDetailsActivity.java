@@ -52,7 +52,10 @@ public class RecipeDetailsActivity extends AppCompatActivity
                     .commit();
 
             if (mIsTwoPane) {
+                arguments = new Bundle();
+                arguments.putBoolean(RecipeStepDetailsFragment.ARGUMENT_IS_PLAYED_IN_TABLET,true);
                 mFragmentRecipeStepDetails = new RecipeStepDetailsFragment();
+                mFragmentRecipeStepDetails.setArguments(arguments);
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.layout_recipe_step_details_container,
                                 mFragmentRecipeStepDetails,

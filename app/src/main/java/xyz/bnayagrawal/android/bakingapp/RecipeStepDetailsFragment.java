@@ -67,7 +67,7 @@ public class RecipeStepDetailsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        if(null != savedInstanceState) {
+        if (null != savedInstanceState) {
             mStepInstruction = savedInstanceState.getString(EXTRA_STEP_INSTRUCTION);
             mVideoInstructionURL = savedInstanceState.getString(EXTRA_VIDEO_INSTRUCTION_URL);
             mElapsedTime = savedInstanceState.getLong(EXTRA_VIDEO_ELAPSED_TIME);
@@ -79,9 +79,19 @@ public class RecipeStepDetailsFragment extends Fragment {
         //If this fragment is instantiated by RecipeStepDetailsActivity
         Bundle bundle = getArguments();
         if (null != bundle) {
-            mStepInstruction = bundle.getString(ARGUMENT_STEP_INSTRUCTION);
-            mVideoInstructionURL = bundle.getString(ARGUMENT_VIDEO_INSTRUCTION_URL);
-            mIsPlayedInTablet = bundle.getBoolean(ARGUMENT_IS_PLAYED_IN_TABLET);
+            if(bundle.containsKey(ARGUMENT_STEP_INSTRUCTION))
+                mStepInstruction = bundle.getString(ARGUMENT_STEP_INSTRUCTION);
+            if(bundle.containsKey(ARGUMENT_VIDEO_INSTRUCTION_URL))
+                mVideoInstructionURL = bundle.getString(ARGUMENT_VIDEO_INSTRUCTION_URL);
+            if(bundle.containsKey(ARGUMENT_IS_PLAYED_IN_TABLET))
+                mIsPlayedInTablet = bundle.getBoolean(ARGUMENT_IS_PLAYED_IN_TABLET);
+        }
+
+        if (!mIsPlayedInTablet && getResources().getConfiguration()
+                .orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mTextStepInstruction.setVisibility(View.GONE);
+            mPlayerView.getLayoutParams()
+                    .height = ViewGroup.LayoutParams.MATCH_PARENT;
         }
 
         return view;
@@ -102,9 +112,9 @@ public class RecipeStepDetailsFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putString(EXTRA_STEP_INSTRUCTION,mStepInstruction);
-        outState.putString(EXTRA_VIDEO_INSTRUCTION_URL,mVideoInstructionURL);
-        outState.putLong(EXTRA_VIDEO_ELAPSED_TIME,mPlayer.getCurrentPosition());
+        outState.putString(EXTRA_STEP_INSTRUCTION, mStepInstruction);
+        outState.putString(EXTRA_VIDEO_INSTRUCTION_URL, mVideoInstructionURL);
+        outState.putLong(EXTRA_VIDEO_ELAPSED_TIME, mPlayer.getCurrentPosition());
         super.onSaveInstanceState(outState);
     }
 
@@ -112,7 +122,7 @@ public class RecipeStepDetailsFragment extends Fragment {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         //If not playing in tablet
-        if(!mIsPlayedInTablet) {
+        if (!mIsPlayedInTablet) {
             if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 mTextStepInstruction.setVisibility(View.GONE);
                 mPlayerView.getLayoutParams()
@@ -120,7 +130,7 @@ public class RecipeStepDetailsFragment extends Fragment {
             } else {
                 mTextStepInstruction.setVisibility(View.VISIBLE);
                 ViewGroup.LayoutParams params = mPlayerView.getLayoutParams();
-                params.height = (int)(256 * getContext().getResources().getDisplayMetrics().density);
+                params.height = (int) (256 * getContext().getResources().getDisplayMetrics().density);
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT;
                 mPlayerView.setLayoutParams(params);
             }
@@ -130,6 +140,7 @@ public class RecipeStepDetailsFragment extends Fragment {
     public void updateInstructions(String stepInstruction, String videoInstructionURL) {
         this.mStepInstruction = stepInstruction;
         this.mVideoInstructionURL = videoInstructionURL;
+        this.mElapsedTime = 0;
         updateContents();
     }
 
@@ -172,14 +183,13 @@ public class RecipeStepDetailsFragment extends Fragment {
         Uri uri;
         if (url == null || url.length() == 0) {
             uri = null;
-            Toast.makeText(getContext(),getString(R.string.video_not_available),Toast.LENGTH_SHORT).show();
-        }
-        else
+            Toast.makeText(getContext(), getString(R.string.video_not_available), Toast.LENGTH_SHORT).show();
+        } else
             uri = Uri.parse(url);
         mPlayer.stop();
         mMediaSource = buildMediaSource(uri, mHandler, mEventLogger);
         mPlayer.prepare(mMediaSource);
-        if(mElapsedTime > 0)
+        if (mElapsedTime > 0)
             mPlayer.seekTo(mElapsedTime);
         mPlayer.setPlayWhenReady(true);
     }
