@@ -34,6 +34,7 @@ import xyz.bnayagrawal.android.bakingapp.util.ServerUtil;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String EXTRA_RECIPE_LIST = "recipe_list";
+    private static final String EXTRA_ERROR_MESSAGE = "error_message";
 
     @BindView(R.id.recycler_view_recipe)
     RecyclerView mRecyclerViewRecipe;
@@ -69,12 +70,24 @@ public class MainActivity extends AppCompatActivity {
         mFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
         mFadeOutAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out);
 
+        mButtonRetry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideErrorView();
+                fetchRecipeList();
+            }
+        });
+
         initRecyclerView();
         initRetrofit();
 
         if(null != savedInstanceState) {
-            mRecipes = savedInstanceState.getParcelableArrayList(EXTRA_RECIPE_LIST);
-            mAdapter.notifyDataSetChanged();
+            if(savedInstanceState.containsKey(EXTRA_RECIPE_LIST)) {
+                mRecipes = savedInstanceState.getParcelableArrayList(EXTRA_RECIPE_LIST);
+                mAdapter.notifyDataSetChanged();
+            } else if(savedInstanceState.containsKey(EXTRA_ERROR_MESSAGE)) {
+                showErrorView(savedInstanceState.getString(EXTRA_ERROR_MESSAGE));
+            }
         } else {
             fetchRecipeList();
         }
@@ -82,8 +95,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if(mRecipes != null)
+        if(mRecipes != null && mRecipes.size() > 0)
             outState.putParcelableArrayList(EXTRA_RECIPE_LIST,mRecipes);
+        else if(mLayoutErrorView.getVisibility() == View.VISIBLE)
+            outState.putString(EXTRA_ERROR_MESSAGE,mTextErrorMessage.getText().toString());
+
         super.onSaveInstanceState(outState);
     }
 
@@ -122,6 +138,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchRecipeList() {
+        if(!isOnline()) {
+            showErrorView(getString(R.string.network_error));
+        }
+
         if (null == mRecipeService)
             mRecipeService = mRetrofit.create(RecipeService.class);
         if (null != mCall && mCall.isExecuted())

@@ -1,4 +1,4 @@
-package xyz.bnayagrawal.android.bakingapp.util;
+package xyz.bnayagrawal.android.bakingapp;
 
 import android.app.Application;
 
@@ -13,7 +13,7 @@ import com.google.android.exoplayer2.util.Util;
  * Created by bnayagrawal on 23/3/18.
  */
 
-public class ExoPlayerApplication extends Application {
+public class BakingApplication extends Application {
 
     protected String userAgent;
 

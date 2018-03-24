@@ -29,7 +29,6 @@ import com.google.android.exoplayer2.util.EventLogger;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import xyz.bnayagrawal.android.bakingapp.util.ExoPlayerApplication;
 
 /**
  * Created by bnayagrawal on 23/3/18.
@@ -165,7 +164,7 @@ public class RecipeStepDetailsFragment extends Fragment {
     }
 
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        return ((ExoPlayerApplication) getActivity().getApplication())
+        return ((BakingApplication) getActivity().getApplication())
                 .buildDataSourceFactory(useBandwidthMeter ? BANDWIDTH_METER : null);
     }
 
