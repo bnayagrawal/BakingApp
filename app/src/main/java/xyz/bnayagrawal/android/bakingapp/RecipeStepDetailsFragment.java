@@ -1,5 +1,6 @@
 package xyz.bnayagrawal.android.bakingapp;
 
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,6 +38,11 @@ import xyz.bnayagrawal.android.bakingapp.util.ExoPlayerApplication;
 public class RecipeStepDetailsFragment extends Fragment {
     public static final String ARGUMENT_STEP_INSTRUCTION = "step_instruction";
     public static final String ARGUMENT_VIDEO_INSTRUCTION_URL = "video_instruction_url";
+    public static final String ARGUMENT_IS_PLAYED_IN_TABLET = "is_played_in_tablet";
+
+    private static final String EXTRA_STEP_INSTRUCTION = "extra_step_instruction";
+    private static final String EXTRA_VIDEO_INSTRUCTION_URL = "extra_video_instruction_url";
+    private static final String EXTRA_VIDEO_ELAPSED_TIME = "video_elapsed_time";
 
     @BindView(R.id.playerView)
     PlayerView mPlayerView;
@@ -46,8 +52,9 @@ public class RecipeStepDetailsFragment extends Fragment {
 
     private String mStepInstruction;
     private String mVideoInstructionURL;
+    private boolean mIsPlayedInTablet;
+    private long mElapsedTime = 0;
 
-    private boolean mLoadedInstructionsFromArguments;
     private SimpleExoPlayer mPlayer;
     private DataSource.Factory mMediaDataSourceFactory;
     private EventLogger mEventLogger;
@@ -57,20 +64,26 @@ public class RecipeStepDetailsFragment extends Fragment {
     private MediaSource mMediaSource;
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        if(null != savedInstanceState) {
+            mStepInstruction = savedInstanceState.getString(EXTRA_STEP_INSTRUCTION);
+            mVideoInstructionURL = savedInstanceState.getString(EXTRA_VIDEO_INSTRUCTION_URL);
+            mElapsedTime = savedInstanceState.getLong(EXTRA_VIDEO_ELAPSED_TIME);
+        }
+
+        View view = inflater.inflate(R.layout.fragment_recipe_step_details, container, false);
+        ButterKnife.bind(this, view);
+
         //If this fragment is instantiated by RecipeStepDetailsActivity
         Bundle bundle = getArguments();
         if (null != bundle) {
             mStepInstruction = bundle.getString(ARGUMENT_STEP_INSTRUCTION);
             mVideoInstructionURL = bundle.getString(ARGUMENT_VIDEO_INSTRUCTION_URL);
-            mLoadedInstructionsFromArguments = true;
+            mIsPlayedInTablet = bundle.getBoolean(ARGUMENT_IS_PLAYED_IN_TABLET);
         }
-
-        View view = inflater.inflate(R.layout.fragment_recipe_step_details, container, false);
-        ButterKnife.bind(this, view);
 
         return view;
     }
@@ -79,14 +92,40 @@ public class RecipeStepDetailsFragment extends Fragment {
     public void onStart() {
         super.onStart();
         initExoPlayer();
-        if (mLoadedInstructionsFromArguments)
-            updateContents();
+        updateContents();
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
         mPlayer.release();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putString(EXTRA_STEP_INSTRUCTION,mStepInstruction);
+        outState.putString(EXTRA_VIDEO_INSTRUCTION_URL,mVideoInstructionURL);
+        outState.putLong(EXTRA_VIDEO_ELAPSED_TIME,mPlayer.getCurrentPosition());
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        //If not playing in tablet
+        if(!mIsPlayedInTablet) {
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                mTextStepInstruction.setVisibility(View.GONE);
+                mPlayerView.getLayoutParams()
+                        .height = ViewGroup.LayoutParams.MATCH_PARENT;
+            } else {
+                mTextStepInstruction.setVisibility(View.VISIBLE);
+                ViewGroup.LayoutParams params = mPlayerView.getLayoutParams();
+                params.height = (int)(256 * getContext().getResources().getDisplayMetrics().density);
+                params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                mPlayerView.setLayoutParams(params);
+            }
+        }
     }
 
     public void updateInstructions(String stepInstruction, String videoInstructionURL) {
@@ -141,7 +180,8 @@ public class RecipeStepDetailsFragment extends Fragment {
         mPlayer.stop();
         mMediaSource = buildMediaSource(uri, mHandler, mEventLogger);
         mPlayer.prepare(mMediaSource);
+        if(mElapsedTime > 0)
+            mPlayer.seekTo(mElapsedTime);
         mPlayer.setPlayWhenReady(true);
     }
-
 }

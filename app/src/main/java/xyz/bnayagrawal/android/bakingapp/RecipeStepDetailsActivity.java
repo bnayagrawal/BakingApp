@@ -1,15 +1,22 @@
 package xyz.bnayagrawal.android.bakingapp;
 
+import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.google.android.exoplayer2.Player;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -21,6 +28,12 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
     public static final String EXTRA_RECIPE = "recipe";
     private static final String TAG = RecipeStepDetailsActivity.class.getSimpleName();
     private static final String FRAGMENT_RECIPE_STEP_DETAILS_TAG = "fragment_recipe_step_details";
+
+    @BindView(R.id.layout_recipe_step_navigation_container)
+    ConstraintLayout mNavigationContainer;
+
+    @BindView(R.id.layout_recipe_step_details_container_root)
+    ConstraintLayout mContainerRoot;
 
     @BindView(R.id.image_button_left)
     ImageButton mImageButtonPrevious;
@@ -52,6 +65,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
         mFragmentRecipeStepDetails = new RecipeStepDetailsFragment();
         Step currentStep = mRecipe.getSteps().get(mCurrentStepNumber);
         bundle = new Bundle();
+        bundle.putBoolean(RecipeStepDetailsFragment.ARGUMENT_IS_PLAYED_IN_TABLET,isLandscape());
         bundle.putString(RecipeStepDetailsFragment.ARGUMENT_STEP_INSTRUCTION,currentStep.getDescription());
         bundle.putString(RecipeStepDetailsFragment.ARGUMENT_VIDEO_INSTRUCTION_URL,currentStep.getVideoURL());
         mFragmentRecipeStepDetails.setArguments(bundle);
@@ -61,6 +75,14 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
 
         updatePaginationText();
         updateButtonAction();
+
+        if(isLandscape()){
+            mNavigationContainer.setVisibility(View.GONE);
+            ActionBar actionBar = getSupportActionBar();
+            if(null != actionBar) actionBar.hide();
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
     }
 
     @Override
@@ -70,6 +92,24 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        ActionBar actionBar = getSupportActionBar();
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mNavigationContainer.setVisibility(View.GONE);
+            if(null != actionBar) actionBar.hide();
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        } else {
+            mNavigationContainer.setVisibility(View.VISIBLE);
+            updatePaginationText();
+            if(null != actionBar) actionBar.show();
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
     }
 
     private void updateButtonAction() {
@@ -118,6 +158,10 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
                     PorterDuff.Mode.MULTIPLY);
             mImageButtonNext.setOnClickListener(null);
         }
+    }
+
+    private boolean isLandscape() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     private void updatePaginationText() {

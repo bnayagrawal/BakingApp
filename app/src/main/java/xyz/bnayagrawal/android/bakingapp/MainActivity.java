@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         initRecyclerView();
         initRetrofit();
 
-        if(null != savedInstanceState && savedInstanceState.containsKey(EXTRA_RECIPE_LIST)) {
+        if(null != savedInstanceState) {
             mRecipes = savedInstanceState.getParcelableArrayList(EXTRA_RECIPE_LIST);
             mAdapter.notifyDataSetChanged();
         } else {
@@ -82,9 +82,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if(mRecipes != null && mRecipes.size() > 0) {
+        if(mRecipes != null)
             outState.putParcelableArrayList(EXTRA_RECIPE_LIST,mRecipes);
-        }
         super.onSaveInstanceState(outState);
     }
 

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import xyz.bnayagrawal.android.bakingapp.model.Step;
 
 public class MasterRecipeDetailsFragment extends Fragment {
     public static final String ARGUMENT_RECIPE = "recipe";
+    private static final String EXTRA_SELECTED_STEP_ITEM_POSITION = "extra_selected_step_item_position";
 
     private OnRecipeStepItemClickListener mCallback;
 
@@ -47,6 +49,7 @@ public class MasterRecipeDetailsFragment extends Fragment {
     private Recipe mRecipe;
     private View lastStepItemColoredView;
     private boolean mIsSplitRecipeDetails = false;
+    private int mSelectedStepItemPosition = -1;
 
     @Override
     public void onAttach(Context context) {
@@ -62,6 +65,11 @@ public class MasterRecipeDetailsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        if(null != savedInstanceState) {
+            mSelectedStepItemPosition = savedInstanceState.getInt(EXTRA_SELECTED_STEP_ITEM_POSITION);
+        }
+
         View view = inflater.inflate(R.layout.fragment_recipe_details, container, false);
         ButterKnife.bind(this, view);
 
@@ -73,12 +81,14 @@ public class MasterRecipeDetailsFragment extends Fragment {
             mIsSplitRecipeDetails = true;
 
         if(!mIsSplitRecipeDetails) {
+            //inflate ingredients list
             mLayoutIngredients = (LinearLayout) getLayoutInflater().inflate(R.layout.partial_recipe_ingredients,null);
         }
 
         String[] steps = getStepDescriptions();
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 getContext(), android.R.layout.simple_list_item_1, steps);
+
         mListRecipeSteps.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -93,6 +103,7 @@ public class MasterRecipeDetailsFragment extends Fragment {
                 //Hence no header is added so the position count would not have increased by 1
                 int itemPosition = (mIsSplitRecipeDetails) ? position : position - 1;
                 mCallback.onRecipeStepItemClicked(itemPosition);
+                mSelectedStepItemPosition = position;
             }
         });
 
@@ -100,11 +111,30 @@ public class MasterRecipeDetailsFragment extends Fragment {
         //Inflate ingredients
         inflateIngredientList();
 
+        //Add ingredients list as header item to listView if not in split mode
         if(!mIsSplitRecipeDetails)
             mListRecipeSteps.addHeaderView(mLayoutIngredients);
 
         mListRecipeSteps.setAdapter(adapter);
+        if(mSelectedStepItemPosition != -1) {
+            View child = getChildFromListView();
+            if(null != child)
+                child.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
+            else
+                Log.d("pos","null");
+        }
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt(EXTRA_SELECTED_STEP_ITEM_POSITION, mSelectedStepItemPosition);
+        super.onSaveInstanceState(outState);
     }
 
     private String[] getStepDescriptions() {
@@ -132,5 +162,14 @@ public class MasterRecipeDetailsFragment extends Fragment {
             textView.setText(quantity);
             mLayoutIngredients.addView(view);
         }
+    }
+
+    private View getChildFromListView() {
+        int firstChildPosition = mListRecipeSteps.getFirstVisiblePosition() - mListRecipeSteps.getHeaderViewsCount();
+        int wantedChildPosition = mSelectedStepItemPosition - firstChildPosition;
+        if(wantedChildPosition < 0 || wantedChildPosition >= mListRecipeSteps.getChildCount())
+            return null;
+        else
+            return mListRecipeSteps.getChildAt(wantedChildPosition);
     }
 }

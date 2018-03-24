@@ -1,12 +1,11 @@
 package xyz.bnayagrawal.android.bakingapp;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -20,7 +19,8 @@ public class RecipeDetailsActivity extends AppCompatActivity
     private static final String FRAGMENT_RECIPE_STEP_DETAILS_TAG = "fragment_recipe_step_details";
     public static final String EXTRA_RECIPE = "recipe";
 
-    @Nullable @BindView(R.id.layout_recipe_step_details_container)
+    @Nullable
+    @BindView(R.id.layout_recipe_step_details_container)
     FrameLayout mLayoutRecipeStepDetailsContainer;
 
     private Recipe mRecipe;
@@ -35,34 +35,41 @@ public class RecipeDetailsActivity extends AppCompatActivity
         setContentView(R.layout.activity_recipe_details);
         ButterKnife.bind(this);
 
-        if(null != mLayoutRecipeStepDetailsContainer)
+        Bundle bundle = getIntent().getExtras();
+        if (null != bundle && bundle.containsKey(EXTRA_RECIPE))
+            mRecipe = bundle.getParcelable(EXTRA_RECIPE);
+
+        if (null != mLayoutRecipeStepDetailsContainer)
             mIsTwoPane = true;
 
-        Bundle bundle = getIntent().getExtras();
-        if(null != bundle && bundle.containsKey(EXTRA_RECIPE))
-            mRecipe = bundle.getParcelable(EXTRA_RECIPE);
-        else
-            finish();
-
-        mFragmentRecipeDetails = new MasterRecipeDetailsFragment();
-        Bundle arguments = new Bundle();
-        arguments.putParcelable(MasterRecipeDetailsFragment.ARGUMENT_RECIPE,mRecipe);
-        mFragmentRecipeDetails.setArguments(arguments);
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.layout_recipe_details_container,mFragmentRecipeDetails, FRAGMENT_RECIPE_DETAILS_TAG)
-                .commit();
-
-        if(mIsTwoPane) {
-            mFragmentRecipeStepDetails = new RecipeStepDetailsFragment();
+        if (null == savedInstanceState) {
+            mFragmentRecipeDetails = new MasterRecipeDetailsFragment();
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(MasterRecipeDetailsFragment.ARGUMENT_RECIPE, mRecipe);
+            mFragmentRecipeDetails.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.layout_recipe_step_details_container, mFragmentRecipeStepDetails, FRAGMENT_RECIPE_STEP_DETAILS_TAG)
+                    .add(R.id.layout_recipe_details_container, mFragmentRecipeDetails, FRAGMENT_RECIPE_DETAILS_TAG)
                     .commit();
+
+            if (mIsTwoPane) {
+                mFragmentRecipeStepDetails = new RecipeStepDetailsFragment();
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.layout_recipe_step_details_container,
+                                mFragmentRecipeStepDetails,
+                                FRAGMENT_RECIPE_STEP_DETAILS_TAG).commit();
+            }
+        } else {
+            mFragmentRecipeDetails = (MasterRecipeDetailsFragment) getSupportFragmentManager()
+                    .findFragmentByTag(FRAGMENT_RECIPE_DETAILS_TAG);
+            if (mIsTwoPane)
+                mFragmentRecipeStepDetails = (RecipeStepDetailsFragment) getSupportFragmentManager()
+                        .findFragmentByTag(FRAGMENT_RECIPE_STEP_DETAILS_TAG);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == android.R.id.home) {
+        if (item.getItemId() == android.R.id.home) {
             onBackPressed();
             return true;
         }
@@ -71,10 +78,10 @@ public class RecipeDetailsActivity extends AppCompatActivity
 
     @Override
     public void onRecipeStepItemClicked(int position) {
-        if(!mIsTwoPane) {
-            Intent intent = new Intent(this,RecipeStepDetailsActivity.class);
-            intent.putExtra(RecipeStepDetailsActivity.EXTRA_STEP_NUMBER,position);
-            intent.putExtra(RecipeStepDetailsActivity.EXTRA_RECIPE,mRecipe);
+        if (!mIsTwoPane) {
+            Intent intent = new Intent(this, RecipeStepDetailsActivity.class);
+            intent.putExtra(RecipeStepDetailsActivity.EXTRA_STEP_NUMBER, position);
+            intent.putExtra(RecipeStepDetailsActivity.EXTRA_RECIPE, mRecipe);
             startActivity(intent);
         } else {
             mFragmentRecipeStepDetails.updateInstructions(
