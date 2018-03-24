@@ -8,7 +8,6 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -81,11 +80,15 @@ public class MainActivity extends AppCompatActivity {
         initRecyclerView();
         initRetrofit();
 
-        if(null != savedInstanceState) {
-            if(savedInstanceState.containsKey(EXTRA_RECIPE_LIST)) {
-                mRecipes = savedInstanceState.getParcelableArrayList(EXTRA_RECIPE_LIST);
-                mAdapter.notifyDataSetChanged();
-            } else if(savedInstanceState.containsKey(EXTRA_ERROR_MESSAGE)) {
+        if (null != savedInstanceState) {
+            if (savedInstanceState.containsKey(EXTRA_RECIPE_LIST)) {
+                ArrayList<Recipe> recipes = savedInstanceState.getParcelableArrayList(EXTRA_RECIPE_LIST);
+                if (recipes != null)
+                    for (Recipe recipe : recipes) {
+                        mRecipes.add(recipe);
+                        mAdapter.notifyItemInserted(mRecipes.size());
+                    }
+            } else if (savedInstanceState.containsKey(EXTRA_ERROR_MESSAGE)) {
                 showErrorView(savedInstanceState.getString(EXTRA_ERROR_MESSAGE));
             }
         } else {
@@ -95,11 +98,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if(mRecipes != null && mRecipes.size() > 0)
-            outState.putParcelableArrayList(EXTRA_RECIPE_LIST,mRecipes);
-        else if(mLayoutErrorView.getVisibility() == View.VISIBLE)
-            outState.putString(EXTRA_ERROR_MESSAGE,mTextErrorMessage.getText().toString());
-
+        if (mRecipes != null && mRecipes.size() > 0)
+            outState.putParcelableArrayList(EXTRA_RECIPE_LIST, mRecipes);
+        else if (mLayoutErrorView.getVisibility() == View.VISIBLE)
+            outState.putString(EXTRA_ERROR_MESSAGE, mTextErrorMessage.getText().toString());
         super.onSaveInstanceState(outState);
     }
 
@@ -123,7 +125,12 @@ public class MainActivity extends AppCompatActivity {
                 );
 
         mRecyclerViewRecipe.setLayoutManager(layoutManager);
-        mRecyclerViewRecipe.setItemAnimator(new FadeInUpAnimator());
+        FadeInUpAnimator animator = new FadeInUpAnimator();
+        animator.setAddDuration(150);
+        animator.setChangeDuration(150);
+        animator.setRemoveDuration(300);
+        animator.setMoveDuration(300);
+        mRecyclerViewRecipe.setItemAnimator(animator);
 
         mRecipes = new ArrayList<>();
         mAdapter = new RecipeRecyclerAdapter(this, mRecipes);
@@ -138,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchRecipeList() {
-        if(!isOnline()) {
+        if (!isOnline()) {
             showErrorView(getString(R.string.network_error));
         }
 
@@ -177,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int getSpanCountBasedOnScreenWidth() {
-        switch ((String)mRecyclerViewRecipe.getTag()) {
+        switch ((String) mRecyclerViewRecipe.getTag()) {
             case "layout-default":
                 return 1;
             case "layout-default-land":
