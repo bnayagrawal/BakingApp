@@ -165,8 +165,12 @@ public class MainActivity extends AppCompatActivity {
                 return 2;
             case "layout-sw600dp":
                 return 2;
+            case "layout-sw600dp-land":
+                return 4;
             case "layout-sw720dp":
                 return 4;
+            case "layout-sw720dp-land":
+                return 6;
             default:
                 return 1;
         }

@@ -35,14 +35,18 @@ public class MasterRecipeDetailsFragment extends Fragment {
         void onRecipeStepItemClicked(int position);
     }
 
+    @Nullable @BindView(R.id.layout_split_recipe_details_container)
+    LinearLayout mLayoutSplitRecipeDetailsContainer;
+
+    @Nullable @BindView(R.id.layout_ingredients_container)
+    LinearLayout mLayoutIngredients;
+
     @BindView(R.id.list_recipe_steps)
     ListView mListRecipeSteps;
 
-    @BindView(R.id.layout_ingredients)
-    LinearLayout mLayoutIngredients;
-
     private Recipe mRecipe;
     private View lastStepItemColoredView;
+    private boolean mIsSplitRecipeDetails = false;
 
     @Override
     public void onAttach(Context context) {
@@ -65,12 +69,16 @@ public class MasterRecipeDetailsFragment extends Fragment {
         if (bundle != null && bundle.containsKey(ARGUMENT_RECIPE))
             mRecipe = bundle.getParcelable(ARGUMENT_RECIPE);
 
-        inflateIngredientList();
+        if(null != mLayoutSplitRecipeDetailsContainer)
+            mIsSplitRecipeDetails = true;
+
+        if(!mIsSplitRecipeDetails) {
+            mLayoutIngredients = (LinearLayout) getLayoutInflater().inflate(R.layout.partial_recipe_ingredients,null);
+        }
 
         String[] steps = getStepDescriptions();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 getContext(), android.R.layout.simple_list_item_1, steps);
-        mListRecipeSteps.setAdapter(adapter);
         mListRecipeSteps.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -80,10 +88,22 @@ public class MasterRecipeDetailsFragment extends Fragment {
                 //change the background color of currently selected item
                 view.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
                 lastStepItemColoredView = view;
-                mCallback.onRecipeStepItemClicked(position);
+                //Since i have added ingredients as header in listView it increases the position count by 1
+                //The ingredients list and steps list are split when used in tablet with landscape orientation
+                //Hence no header is added so the position count would not have increased by 1
+                int itemPosition = (mIsSplitRecipeDetails) ? position : position - 1;
+                mCallback.onRecipeStepItemClicked(itemPosition);
             }
         });
 
+
+        //Inflate ingredients
+        inflateIngredientList();
+
+        if(!mIsSplitRecipeDetails)
+            mListRecipeSteps.addHeaderView(mLayoutIngredients);
+
+        mListRecipeSteps.setAdapter(adapter);
         return view;
     }
 
