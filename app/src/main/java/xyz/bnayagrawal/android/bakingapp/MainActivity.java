@@ -82,10 +82,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         if(mRecipes != null && mRecipes.size() > 0) {
             outState.putParcelableArrayList(EXTRA_RECIPE_LIST,mRecipes);
         }
+        super.onSaveInstanceState(outState);
     }
 
     @Override

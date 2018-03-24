@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_split_recipe_details_container"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:weightSum="100"
+    android:orientation="horizontal">
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="50"
+        android:fillViewport="true">
+
+        <include layout="@layout/partial_recipe_ingredients" />
+
+    </ScrollView>
+
+    <ListView
+        android:id="@+id/list_recipe_steps"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="50" />
+</LinearLayout>
