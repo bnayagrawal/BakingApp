@@ -79,11 +79,11 @@ public class RecipeStepDetailsFragment extends Fragment {
         //If this fragment is instantiated by RecipeStepDetailsActivity
         Bundle bundle = getArguments();
         if (null != bundle) {
-            if(bundle.containsKey(ARGUMENT_STEP_INSTRUCTION))
+            if (bundle.containsKey(ARGUMENT_STEP_INSTRUCTION))
                 mStepInstruction = bundle.getString(ARGUMENT_STEP_INSTRUCTION);
-            if(bundle.containsKey(ARGUMENT_VIDEO_INSTRUCTION_URL))
+            if (bundle.containsKey(ARGUMENT_VIDEO_INSTRUCTION_URL))
                 mVideoInstructionURL = bundle.getString(ARGUMENT_VIDEO_INSTRUCTION_URL);
-            if(bundle.containsKey(ARGUMENT_IS_PLAYED_IN_TABLET))
+            if (bundle.containsKey(ARGUMENT_IS_PLAYED_IN_TABLET))
                 mIsPlayedInTablet = bundle.getBoolean(ARGUMENT_IS_PLAYED_IN_TABLET);
         }
 
@@ -107,7 +107,9 @@ public class RecipeStepDetailsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mPlayer.stop();
         mPlayer.release();
+        mPlayer = null;
     }
 
     @Override

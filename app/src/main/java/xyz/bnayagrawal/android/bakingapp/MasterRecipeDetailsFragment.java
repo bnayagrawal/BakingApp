@@ -81,9 +81,6 @@ public class MasterRecipeDetailsFragment extends Fragment {
         if(null != mLayoutSplitRecipeDetailsContainer)
             mIsSplitRecipeDetails = true;
 
-        //Inflate steps header item
-        mStepsHeaderView = (TextView) getLayoutInflater().inflate(R.layout.item_steps_header,null);
-
         if(!mIsSplitRecipeDetails) {
             //inflate ingredients list
             mLayoutIngredients = (LinearLayout) getLayoutInflater().inflate(R.layout.partial_recipe_ingredients,null);
@@ -118,6 +115,8 @@ public class MasterRecipeDetailsFragment extends Fragment {
             mListRecipeSteps.addHeaderView(mLayoutIngredients);
 
         //Add steps header view
+        //Inflate steps header item
+        mStepsHeaderView = (TextView) getLayoutInflater().inflate(R.layout.item_steps_header,null);
         mListRecipeSteps.addHeaderView(mStepsHeaderView);
 
         mListRecipeSteps.setAdapter(adapter);
