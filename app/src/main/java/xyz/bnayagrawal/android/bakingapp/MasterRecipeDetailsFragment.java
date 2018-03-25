@@ -112,12 +112,12 @@ public class MasterRecipeDetailsFragment extends Fragment {
 
         //Add ingredients list as header item to listView if not in split mode
         if(!mIsSplitRecipeDetails)
-            mListRecipeSteps.addHeaderView(mLayoutIngredients);
+            mListRecipeSteps.addHeaderView(mLayoutIngredients,null,false);
 
         //Add steps header view
         //Inflate steps header item
         mStepsHeaderView = (TextView) getLayoutInflater().inflate(R.layout.item_steps_header,null);
-        mListRecipeSteps.addHeaderView(mStepsHeaderView);
+        mListRecipeSteps.addHeaderView(mStepsHeaderView,null,false);
 
         mListRecipeSteps.setAdapter(adapter);
         if(mSelectedStepItemPosition != -1) {
