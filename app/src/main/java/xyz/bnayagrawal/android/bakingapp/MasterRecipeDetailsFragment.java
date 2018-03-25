@@ -50,6 +50,7 @@ public class MasterRecipeDetailsFragment extends Fragment {
     private View lastStepItemColoredView;
     private boolean mIsSplitRecipeDetails = false;
     private int mSelectedStepItemPosition = -1;
+    private View mStepsHeaderView;
 
     @Override
     public void onAttach(Context context) {
@@ -80,6 +81,9 @@ public class MasterRecipeDetailsFragment extends Fragment {
         if(null != mLayoutSplitRecipeDetailsContainer)
             mIsSplitRecipeDetails = true;
 
+        //Inflate steps header item
+        mStepsHeaderView = (TextView) getLayoutInflater().inflate(R.layout.item_steps_header,null);
+
         if(!mIsSplitRecipeDetails) {
             //inflate ingredients list
             mLayoutIngredients = (LinearLayout) getLayoutInflater().inflate(R.layout.partial_recipe_ingredients,null);
@@ -98,11 +102,9 @@ public class MasterRecipeDetailsFragment extends Fragment {
                 //change the background color of currently selected item
                 view.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
                 lastStepItemColoredView = view;
-                //Since i have added ingredients as header in listView it increases the position count by 1
-                //The ingredients list and steps list are split when used in tablet with landscape orientation
-                //Hence no header is added so the position count would not have increased by 1
-                int itemPosition = (mIsSplitRecipeDetails) ? position : position - 1;
-                mCallback.onRecipeStepItemClicked(itemPosition);
+                //ListView headers are counted as items, so needs to be subtracted
+                position -= mListRecipeSteps.getHeaderViewsCount();
+                mCallback.onRecipeStepItemClicked(position);
                 mSelectedStepItemPosition = position;
             }
         });
@@ -114,6 +116,9 @@ public class MasterRecipeDetailsFragment extends Fragment {
         //Add ingredients list as header item to listView if not in split mode
         if(!mIsSplitRecipeDetails)
             mListRecipeSteps.addHeaderView(mLayoutIngredients);
+
+        //Add steps header view
+        mListRecipeSteps.addHeaderView(mStepsHeaderView);
 
         mListRecipeSteps.setAdapter(adapter);
         if(mSelectedStepItemPosition != -1) {

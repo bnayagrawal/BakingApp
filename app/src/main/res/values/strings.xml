@@ -4,6 +4,7 @@
     <string name="recipe_step_details">Recipe Step Details</string>
     <string name="steps">Step</string>
     <string name="video_not_available">Video not available for this step!</string>
+    <string name="label_steps">Steps</string>
     <!-- main activity -->
     <string name="loading">Loading&#8230;</string>
     <string name="retry">Retry</string>

@@ -6,6 +6,7 @@
     <color name="colorPrimaryLight">#96ddfe</color>
 
     <color name="white">#ffffff</color>
+    <color name="lightGrey">#e0e0e0</color>
     <color name="rippleColor">#bdbdbd</color>
     <color name="divider">#DCDCDC</color>
     <color name="darkBackground">#111111</color>
