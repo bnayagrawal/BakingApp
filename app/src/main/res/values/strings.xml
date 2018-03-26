@@ -16,5 +16,7 @@
     <string name="recipe_image_content_description">Recipe Image</string>
 
     <!-- Recipe details -->
-    <string name="ingredients">Ingredients</string>
+    <string name="label_ingredients">Ingredients</string>
+    <!-- for widget -->
+    <string name="empty_widget_text">Please select a recipe first!</string>
 </resources>

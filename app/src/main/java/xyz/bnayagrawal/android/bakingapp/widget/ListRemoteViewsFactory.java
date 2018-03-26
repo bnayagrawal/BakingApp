@@ -1,9 +1,16 @@
-package xyz.bnayagrawal.android.bakingapp;
+package xyz.bnayagrawal.android.bakingapp.widget;
 
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import xyz.bnayagrawal.android.bakingapp.R;
+import xyz.bnayagrawal.android.bakingapp.model.Ingredient;
 
 /**
  * Created by bnayagrawal on 26/3/18.
@@ -12,16 +19,21 @@ import android.widget.RemoteViewsService;
 public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private Context mContext;
-    private Intent mIntent;
+    private int mAppWidgetId;
+    private List<Ingredient> mIngredientList;
 
     public ListRemoteViewsFactory(Context context, Intent intent) {
         this.mContext = context;
-        this.mIntent = intent;
+        mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID);
+        if(intent.hasExtra(BakingAppWidgetService.EXTRA_INGREDIENT_LIST))
+            mIngredientList = intent.getParcelableArrayListExtra(BakingAppWidgetService.EXTRA_INGREDIENT_LIST);
+        else
+            mIngredientList = new ArrayList<>();
     }
 
     @Override
     public void onCreate() {
-
     }
 
     @Override
@@ -36,12 +48,17 @@ public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFac
 
     @Override
     public int getCount() {
-        return 0;
+        return mIngredientList.size();
     }
 
     @Override
     public RemoteViews getViewAt(int position) {
-        return null;
+        RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.id.text_widget_recipe_step);
+        Ingredient ingredient = mIngredientList.get(position);
+        String ingredientText = ingredient.getQuantity() + " " +
+                ingredient.getMeasure() + " " + ingredient.getIngredient();
+        rv.setTextViewText(R.id.text_widget_recipe_step, ingredientText);
+        return rv;
     }
 
     @Override
@@ -56,7 +73,7 @@ public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFac
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override

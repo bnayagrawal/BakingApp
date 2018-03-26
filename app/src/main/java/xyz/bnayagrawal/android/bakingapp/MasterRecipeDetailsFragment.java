@@ -1,16 +1,15 @@
 package xyz.bnayagrawal.android.bakingapp;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -22,7 +21,7 @@ import butterknife.ButterKnife;
 import xyz.bnayagrawal.android.bakingapp.adapter.RecipeStepsListAdapter;
 import xyz.bnayagrawal.android.bakingapp.model.Ingredient;
 import xyz.bnayagrawal.android.bakingapp.model.Recipe;
-import xyz.bnayagrawal.android.bakingapp.model.Step;
+import xyz.bnayagrawal.android.bakingapp.widget.BakingAppWidgetProvider;
 
 /**
  * Created by bnayagrawal on 23/3/18.
@@ -92,12 +91,18 @@ public class MasterRecipeDetailsFragment extends Fragment {
 
         //Add steps header view
         mListRecipeSteps.addHeaderView(
-                getLayoutInflater().inflate(R.layout.item_steps_header,null),
+                getLayoutInflater().inflate(R.layout.partial_steps_header,null),
                 null,
                 false
         );
 
         mListRecipeSteps.setAdapter(adapter);
+
+        //update widgets
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(mContext, BakingAppWidgetProvider.class));
+        BakingAppWidgetProvider.updateWidgets(mContext,appWidgetManager,appWidgetIds,mRecipe.getIngredients());
+
         return view;
     }
 

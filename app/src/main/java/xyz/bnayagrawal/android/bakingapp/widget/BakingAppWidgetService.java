@@ -1,4 +1,4 @@
-package xyz.bnayagrawal.android.bakingapp;
+package xyz.bnayagrawal.android.bakingapp.widget;
 
 import android.content.Intent;
 import android.widget.RemoteViewsService;
@@ -8,9 +8,10 @@ import android.widget.RemoteViewsService;
  */
 
 public class BakingAppWidgetService extends RemoteViewsService {
+    public static final String EXTRA_INGREDIENT_LIST = "extra_ingredient_list";
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new ListRemoteViewsFactory();
+        return new ListRemoteViewsFactory(this.getApplicationContext(),intent);
     }
 }
