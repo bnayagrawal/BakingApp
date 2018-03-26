@@ -19,6 +19,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import xyz.bnayagrawal.android.bakingapp.adapter.RecipeStepsListAdapter;
 import xyz.bnayagrawal.android.bakingapp.model.Ingredient;
 import xyz.bnayagrawal.android.bakingapp.model.Recipe;
 import xyz.bnayagrawal.android.bakingapp.model.Step;
@@ -30,12 +31,7 @@ import xyz.bnayagrawal.android.bakingapp.model.Step;
 public class MasterRecipeDetailsFragment extends Fragment {
     public static final String ARGUMENT_RECIPE = "recipe";
     private static final String EXTRA_SELECTED_STEP_ITEM_POSITION = "extra_selected_step_item_position";
-
-    private OnRecipeStepItemClickListener mCallback;
-
-    public interface OnRecipeStepItemClickListener {
-        void onRecipeStepItemClicked(int position);
-    }
+    private static final String EXTRA_RECIPE = "recipe";
 
     @Nullable @BindView(R.id.layout_split_recipe_details_container)
     LinearLayout mLayoutSplitRecipeDetailsContainer;
@@ -46,21 +42,15 @@ public class MasterRecipeDetailsFragment extends Fragment {
     @BindView(R.id.list_recipe_steps)
     ListView mListRecipeSteps;
 
+    private Context mContext;
     private Recipe mRecipe;
-    private View lastStepItemColoredView;
     private boolean mIsSplitRecipeDetails = false;
     private int mSelectedStepItemPosition = -1;
-    private View mStepsHeaderView;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        try {
-            mCallback = (OnRecipeStepItemClickListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement OnRecipeStepItemClickListener");
-        }
+        mContext = context;
     }
 
     @Nullable
@@ -68,6 +58,7 @@ public class MasterRecipeDetailsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         if(null != savedInstanceState) {
+            mRecipe = savedInstanceState.getParcelable(EXTRA_RECIPE);
             mSelectedStepItemPosition = savedInstanceState.getInt(EXTRA_SELECTED_STEP_ITEM_POSITION);
         }
 
@@ -86,26 +77,11 @@ public class MasterRecipeDetailsFragment extends Fragment {
             mLayoutIngredients = (LinearLayout) getLayoutInflater().inflate(R.layout.partial_recipe_ingredients,null);
         }
 
-        String[] steps = getStepDescriptions();
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                getContext(), android.R.layout.simple_list_item_1, steps);
-
-        mListRecipeSteps.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //change the background color to white for previously selected item
-                if(null != lastStepItemColoredView)
-                    lastStepItemColoredView.setBackgroundColor(getResources().getColor(R.color.white));
-                //change the background color of currently selected item
-                view.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
-                lastStepItemColoredView = view;
-                //ListView headers are counted as items, so needs to be subtracted
-                position -= mListRecipeSteps.getHeaderViewsCount();
-                mCallback.onRecipeStepItemClicked(position);
-                mSelectedStepItemPosition = position;
-            }
-        });
-
+        RecipeStepsListAdapter adapter = new RecipeStepsListAdapter(
+                mContext,
+                mRecipe.getSteps(),
+                (mSelectedStepItemPosition == -1) ? null : mSelectedStepItemPosition
+        );
 
         //Inflate ingredients
         inflateIngredientList();
@@ -115,18 +91,13 @@ public class MasterRecipeDetailsFragment extends Fragment {
             mListRecipeSteps.addHeaderView(mLayoutIngredients,null,false);
 
         //Add steps header view
-        //Inflate steps header item
-        mStepsHeaderView = (TextView) getLayoutInflater().inflate(R.layout.item_steps_header,null);
-        mListRecipeSteps.addHeaderView(mStepsHeaderView,null,false);
+        mListRecipeSteps.addHeaderView(
+                getLayoutInflater().inflate(R.layout.item_steps_header,null),
+                null,
+                false
+        );
 
         mListRecipeSteps.setAdapter(adapter);
-        if(mSelectedStepItemPosition != -1) {
-            View child = getChildFromListView();
-            if(null != child)
-                child.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
-            else
-                Log.d("pos","null");
-        }
         return view;
     }
 
@@ -137,18 +108,9 @@ public class MasterRecipeDetailsFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putParcelable(EXTRA_RECIPE,mRecipe);
         outState.putInt(EXTRA_SELECTED_STEP_ITEM_POSITION, mSelectedStepItemPosition);
         super.onSaveInstanceState(outState);
-    }
-
-    private String[] getStepDescriptions() {
-        List<Step> stepList = mRecipe.getSteps();
-        String[] steps = new String[stepList.size()];
-
-        for (int i = 0; i < stepList.size(); i++)
-            steps[i] = stepList.get(i).getShortDescription();
-
-        return steps;
     }
 
     private void inflateIngredientList() {
@@ -168,12 +130,7 @@ public class MasterRecipeDetailsFragment extends Fragment {
         }
     }
 
-    private View getChildFromListView() {
-        int firstChildPosition = mListRecipeSteps.getFirstVisiblePosition() - mListRecipeSteps.getHeaderViewsCount();
-        int wantedChildPosition = mSelectedStepItemPosition - firstChildPosition;
-        if(wantedChildPosition < 0 || wantedChildPosition >= mListRecipeSteps.getChildCount())
-            return null;
-        else
-            return mListRecipeSteps.getChildAt(wantedChildPosition);
+    public void setSelectedItemPosition(int selectedItemPosition) {
+        this.mSelectedStepItemPosition = selectedItemPosition;
     }
 }

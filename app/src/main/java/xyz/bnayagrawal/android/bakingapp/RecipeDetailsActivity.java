@@ -9,10 +9,11 @@ import android.widget.FrameLayout;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import xyz.bnayagrawal.android.bakingapp.adapter.RecipeStepsListAdapter;
 import xyz.bnayagrawal.android.bakingapp.model.Recipe;
 
 public class RecipeDetailsActivity extends AppCompatActivity
-        implements MasterRecipeDetailsFragment.OnRecipeStepItemClickListener {
+        implements RecipeStepsListAdapter.OnRecipeStepClickListener {
 
     private static final String TAG = RecipeDetailsActivity.class.getSimpleName();
     private static final String FRAGMENT_RECIPE_DETAILS_TAG = "fragment_recipe_details";
@@ -80,13 +81,14 @@ public class RecipeDetailsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRecipeStepItemClicked(int position) {
+    public void onRecipeStepClicked(int position) {
         if (!mIsTwoPane) {
             Intent intent = new Intent(this, RecipeStepDetailsActivity.class);
             intent.putExtra(RecipeStepDetailsActivity.EXTRA_STEP_NUMBER, position);
             intent.putExtra(RecipeStepDetailsActivity.EXTRA_RECIPE, mRecipe);
             startActivity(intent);
         } else {
+            mFragmentRecipeDetails.setSelectedItemPosition(position);
             mFragmentRecipeStepDetails.updateInstructions(
                     mRecipe.getSteps().get(position).getDescription(),
                     mRecipe.getSteps().get(position).getVideoURL()

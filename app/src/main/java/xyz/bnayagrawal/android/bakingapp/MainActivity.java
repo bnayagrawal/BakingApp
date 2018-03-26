@@ -147,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
     private void fetchRecipeList() {
         if (!isOnline()) {
             showErrorView(getString(R.string.network_error));
+            return;
         }
 
         if (null == mRecipeService)
