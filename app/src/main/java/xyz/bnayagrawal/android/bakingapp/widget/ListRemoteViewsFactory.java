@@ -1,16 +1,16 @@
 package xyz.bnayagrawal.android.bakingapp.widget;
 
-import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.os.Binder;
+import android.widget.AdapterView;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import xyz.bnayagrawal.android.bakingapp.R;
-import xyz.bnayagrawal.android.bakingapp.model.Ingredient;
+import xyz.bnayagrawal.android.bakingapp.provider.RecipeIngredientsContract;
+import xyz.bnayagrawal.android.bakingapp.provider.RecipeIngredientsContract.RecipeIngredientsEntry;
 
 /**
  * Created by bnayagrawal on 26/3/18.
@@ -19,45 +19,83 @@ import xyz.bnayagrawal.android.bakingapp.model.Ingredient;
 public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private Context mContext;
-    private int mAppWidgetId;
-    private List<Ingredient> mIngredientList;
+    private Cursor mCursor;
 
     public ListRemoteViewsFactory(Context context, Intent intent) {
         this.mContext = context;
-        mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID);
-        if(intent.hasExtra(BakingAppWidgetService.EXTRA_INGREDIENT_LIST))
-            mIngredientList = intent.getParcelableArrayListExtra(BakingAppWidgetService.EXTRA_INGREDIENT_LIST);
-        else
-            mIngredientList = new ArrayList<>();
     }
 
     @Override
     public void onCreate() {
+
     }
 
     @Override
     public void onDataSetChanged() {
+        if (mCursor != null) {
+            mCursor.close();
+        }
 
+        final long identityToken = Binder.clearCallingIdentity();
+        mCursor = mContext.getContentResolver().query(
+                RecipeIngredientsContract.RecipeIngredientsEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+
+        Binder.restoreCallingIdentity(identityToken);
     }
 
     @Override
     public void onDestroy() {
-
+        if (mCursor != null) {
+            mCursor.close();
+        }
     }
 
     @Override
     public int getCount() {
-        return mIngredientList.size();
+        if (mCursor != null)
+            return mCursor.getCount();
+        else
+            return 0;
     }
 
     @Override
     public RemoteViews getViewAt(int position) {
-        RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.id.text_widget_recipe_step);
-        Ingredient ingredient = mIngredientList.get(position);
-        String ingredientText = ingredient.getQuantity() + " " +
-                ingredient.getMeasure() + " " + ingredient.getIngredient();
-        rv.setTextViewText(R.id.text_widget_recipe_step, ingredientText);
+        String ingredient;
+        if (null == mCursor || position == AdapterView.INVALID_POSITION || !mCursor.moveToPosition(position))
+            return null;
+
+        //Add quantity
+        ingredient = mCursor.getString(
+                mCursor.getColumnIndex(
+                        RecipeIngredientsEntry.COLUMN_QUANTITY
+                )
+        );
+
+        //Add measure
+        ingredient += " " + mCursor.getString(
+                mCursor.getColumnIndex(
+                        RecipeIngredientsEntry.COLUMN_MEASURE
+                )
+        );
+
+        //Add ingredient name
+        ingredient += " " + mCursor.getString(
+                mCursor.getColumnIndex(
+                        RecipeIngredientsEntry.COLUMN_INGREDIENT
+                )
+        );
+
+        RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.widget_step_list_item);
+        rv.setTextViewText(R.id.text_widget_recipe_step, ingredient);
+
+        Intent fillInIntent = new Intent();
+        rv.setOnClickFillInIntent(R.id.text_widget_recipe_step, fillInIntent);
+
         return rv;
     }
 
@@ -68,16 +106,20 @@ public class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFac
 
     @Override
     public int getViewTypeCount() {
-        return 0;
+        return 1;
     }
 
     @Override
     public long getItemId(int position) {
-        return position;
+        int id = position;
+        if (mCursor.moveToPosition(position))
+            id = mCursor.getInt(0);
+
+        return id;
     }
 
     @Override
     public boolean hasStableIds() {
-        return false;
+        return true;
     }
 }

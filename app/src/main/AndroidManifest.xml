@@ -50,6 +50,11 @@
 
         <service android:name=".widget.BakingAppWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <provider
+            android:authorities="xyz.bnayagrawal.android.bakingapp"
+            android:name="xyz.bnayagrawal.android.bakingapp.provider.RecipeIngredientsProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

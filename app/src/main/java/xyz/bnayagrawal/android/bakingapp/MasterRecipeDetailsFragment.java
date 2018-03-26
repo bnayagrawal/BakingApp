@@ -2,11 +2,14 @@ package xyz.bnayagrawal.android.bakingapp;
 
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +24,10 @@ import butterknife.ButterKnife;
 import xyz.bnayagrawal.android.bakingapp.adapter.RecipeStepsListAdapter;
 import xyz.bnayagrawal.android.bakingapp.model.Ingredient;
 import xyz.bnayagrawal.android.bakingapp.model.Recipe;
+import xyz.bnayagrawal.android.bakingapp.provider.RecipeIngredientsContract;
 import xyz.bnayagrawal.android.bakingapp.widget.BakingAppWidgetProvider;
 
+import xyz.bnayagrawal.android.bakingapp.provider.RecipeIngredientsContract.RecipeIngredientsEntry;
 /**
  * Created by bnayagrawal on 23/3/18.
  */
@@ -32,10 +37,12 @@ public class MasterRecipeDetailsFragment extends Fragment {
     private static final String EXTRA_SELECTED_STEP_ITEM_POSITION = "extra_selected_step_item_position";
     private static final String EXTRA_RECIPE = "recipe";
 
-    @Nullable @BindView(R.id.layout_split_recipe_details_container)
+    @Nullable
+    @BindView(R.id.layout_split_recipe_details_container)
     LinearLayout mLayoutSplitRecipeDetailsContainer;
 
-    @Nullable @BindView(R.id.layout_ingredients_container)
+    @Nullable
+    @BindView(R.id.layout_ingredients_container)
     LinearLayout mLayoutIngredients;
 
     @BindView(R.id.list_recipe_steps)
@@ -56,7 +63,7 @@ public class MasterRecipeDetailsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        if(null != savedInstanceState) {
+        if (null != savedInstanceState) {
             mRecipe = savedInstanceState.getParcelable(EXTRA_RECIPE);
             mSelectedStepItemPosition = savedInstanceState.getInt(EXTRA_SELECTED_STEP_ITEM_POSITION);
         }
@@ -68,12 +75,12 @@ public class MasterRecipeDetailsFragment extends Fragment {
         if (bundle != null && bundle.containsKey(ARGUMENT_RECIPE))
             mRecipe = bundle.getParcelable(ARGUMENT_RECIPE);
 
-        if(null != mLayoutSplitRecipeDetailsContainer)
+        if (null != mLayoutSplitRecipeDetailsContainer)
             mIsSplitRecipeDetails = true;
 
-        if(!mIsSplitRecipeDetails) {
+        if (!mIsSplitRecipeDetails) {
             //inflate ingredients list
-            mLayoutIngredients = (LinearLayout) getLayoutInflater().inflate(R.layout.partial_recipe_ingredients,null);
+            mLayoutIngredients = (LinearLayout) getLayoutInflater().inflate(R.layout.partial_recipe_ingredients, null);
         }
 
         RecipeStepsListAdapter adapter = new RecipeStepsListAdapter(
@@ -86,12 +93,12 @@ public class MasterRecipeDetailsFragment extends Fragment {
         inflateIngredientList();
 
         //Add ingredients list as header item to listView if not in split mode
-        if(!mIsSplitRecipeDetails)
-            mListRecipeSteps.addHeaderView(mLayoutIngredients,null,false);
+        if (!mIsSplitRecipeDetails)
+            mListRecipeSteps.addHeaderView(mLayoutIngredients, null, false);
 
         //Add steps header view
         mListRecipeSteps.addHeaderView(
-                getLayoutInflater().inflate(R.layout.partial_steps_header,null),
+                getLayoutInflater().inflate(R.layout.partial_steps_header, null),
                 null,
                 false
         );
@@ -99,9 +106,8 @@ public class MasterRecipeDetailsFragment extends Fragment {
         mListRecipeSteps.setAdapter(adapter);
 
         //update widgets
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(mContext, BakingAppWidgetProvider.class));
-        BakingAppWidgetProvider.updateWidgets(mContext,appWidgetManager,appWidgetIds,mRecipe.getIngredients());
+        updateDatabase();
+        BakingAppWidgetProvider.sendRefreshBroadcast(mContext);
 
         return view;
     }
@@ -113,7 +119,7 @@ public class MasterRecipeDetailsFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putParcelable(EXTRA_RECIPE,mRecipe);
+        outState.putParcelable(EXTRA_RECIPE, mRecipe);
         outState.putInt(EXTRA_SELECTED_STEP_ITEM_POSITION, mSelectedStepItemPosition);
         super.onSaveInstanceState(outState);
     }
@@ -137,5 +143,36 @@ public class MasterRecipeDetailsFragment extends Fragment {
 
     public void setSelectedItemPosition(int selectedItemPosition) {
         this.mSelectedStepItemPosition = selectedItemPosition;
+    }
+
+    private void updateDatabase(){
+        eraseDatabase();
+        ContentResolver resolver = mContext.getContentResolver();
+        ContentValues[] contentValuesArray = new ContentValues[mRecipe.getIngredients().size()];
+
+        ContentValues contentValues;
+        List<Ingredient> ingredients = mRecipe.getIngredients();
+
+        for(int i=0; i < ingredients.size(); i++) {
+            contentValues = new ContentValues();
+            contentValues.put(RecipeIngredientsEntry.COLUMN_QUANTITY,ingredients.get(i).getQuantity());
+            contentValues.put(RecipeIngredientsEntry.COLUMN_MEASURE,ingredients.get(i).getMeasure());
+            contentValues.put(RecipeIngredientsEntry.COLUMN_INGREDIENT,ingredients.get(i).getIngredient());
+            contentValuesArray[i] = contentValues;
+        }
+
+        resolver.bulkInsert(
+                RecipeIngredientsEntry.CONTENT_URI,
+                contentValuesArray
+        );
+
+    }
+
+    private void eraseDatabase() {
+        mContext.getContentResolver().delete(
+                RecipeIngredientsContract.RecipeIngredientsEntry.CONTENT_URI,
+                null,
+                null
+        );
     }
 }

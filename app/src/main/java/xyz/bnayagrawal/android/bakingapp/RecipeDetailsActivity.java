@@ -44,6 +44,15 @@ public class RecipeDetailsActivity extends AppCompatActivity
             mIsTwoPane = true;
 
         if (null == savedInstanceState) {
+            if(null == mRecipe) {
+                //If the user clicks on widget to start this activity while this app is not
+                //Running then launch the main activity
+                Intent intent = new Intent(this,MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            }
+
             mFragmentRecipeDetails = new MasterRecipeDetailsFragment();
             Bundle arguments = new Bundle();
             arguments.putParcelable(MasterRecipeDetailsFragment.ARGUMENT_RECIPE, mRecipe);

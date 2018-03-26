@@ -8,7 +8,6 @@ import android.widget.RemoteViewsService;
  */
 
 public class BakingAppWidgetService extends RemoteViewsService {
-    public static final String EXTRA_INGREDIENT_LIST = "extra_ingredient_list";
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
