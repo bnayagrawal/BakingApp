@@ -45,3 +45,8 @@ Some screenshots (Tablet)
 ![Screenshot](https://i.imgur.com/Rf0YAak.png)
 ![Screenshot](https://i.imgur.com/59lx6fy.png)
 ![Screenshot](https://i.imgur.com/6CaUI6r.png)
+
+Some Screenshots (Phone)
+------------------------
+![Screenshot](https://i.imgur.com/uuim09J.jpg)
+![Screenshot](https://i.imgur.com/XgFjm0E.jpg)
