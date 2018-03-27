@@ -64,6 +64,11 @@ public class RecipeDetailsScreenTest {
 
     @Test
     public void clickRecipeStep_openRecipeStepDetailsActivity() {
+        //I have added 2 as position because in mobile the "ingredients list"(position 0) and
+        //the "steps label" (position 1) are added as list headers, so first item in the list
+        //will be in "position 2"
         onData(anything()).inAdapterView(withId(R.id.list_recipe_steps)).atPosition(2).perform(click());
+        //If you have to test this on tablet, then set the position value 1, because in tablet only the
+        //"steps label" is added as header to step list, so the position of first step in list will be 1
     }
 }
