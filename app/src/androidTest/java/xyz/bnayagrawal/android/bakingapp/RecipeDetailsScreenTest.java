@@ -63,7 +63,7 @@ public class RecipeDetailsScreenTest {
             };
 
     @Test
-    public void clickRecipeStep_openRecipeStepDetailsActivity() {
+    public void clickRecipeStep_playVideoOrLaunchStepDetailsActivity() {
         //I have added 2 as position because in mobile the "ingredients list"(position 0) and
         //the "steps label" (position 1) are added as list headers, so first item in the list
         //will be in "position 2"
