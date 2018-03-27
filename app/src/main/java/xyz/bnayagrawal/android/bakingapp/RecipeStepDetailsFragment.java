@@ -7,20 +7,28 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceEventListener;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -34,7 +42,9 @@ import butterknife.ButterKnife;
  * Created by bnayagrawal on 23/3/18.
  */
 
-public class RecipeStepDetailsFragment extends Fragment {
+public class RecipeStepDetailsFragment extends Fragment
+        implements ExoPlayer.EventListener {
+    private static final String TAG = RecipeStepDetailsFragment.class.getSimpleName();
     public static final String ARGUMENT_STEP_INSTRUCTION = "step_instruction";
     public static final String ARGUMENT_VIDEO_INSTRUCTION_URL = "video_instruction_url";
     public static final String ARGUMENT_IS_PLAYED_IN_TABLET = "is_played_in_tablet";
@@ -60,7 +70,9 @@ public class RecipeStepDetailsFragment extends Fragment {
     private Handler mHandler;
     private TrackSelection.Factory mVideoTrackSelectionFactory;
     private TrackSelector mTrackSelector;
+    private MediaSessionCompat mMediaSession;
     private MediaSource mMediaSource;
+    private PlaybackStateCompat.Builder mStateBuilder;
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
 
     @Nullable
@@ -100,6 +112,7 @@ public class RecipeStepDetailsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        initializeMediaSession();
         initExoPlayer();
         updateContents();
     }
@@ -168,6 +181,7 @@ public class RecipeStepDetailsFragment extends Fragment {
 
         //set the video source
         mPlayer.prepare(mMediaSource);
+        mPlayer.addListener(this);
     }
 
     private MediaSource buildMediaSource(Uri uri, @Nullable Handler handler,
@@ -194,5 +208,99 @@ public class RecipeStepDetailsFragment extends Fragment {
         if (mElapsedTime > 0)
             mPlayer.seekTo(mElapsedTime);
         mPlayer.setPlayWhenReady(true);
+    }
+
+    private void initializeMediaSession() {
+        mMediaSession = new MediaSessionCompat(getContext(), TAG);
+
+        mMediaSession.setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
+                        MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        mMediaSession.setMediaButtonReceiver(null);
+        mStateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(
+                        PlaybackStateCompat.ACTION_PLAY |
+                                PlaybackStateCompat.ACTION_PAUSE |
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                                PlaybackStateCompat.ACTION_PLAY_PAUSE);
+
+        mMediaSession.setPlaybackState(mStateBuilder.build());
+        mMediaSession.setCallback(new MySessionCallback());
+        mMediaSession.setActive(true);
+    }
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+
+    }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        if((playbackState == ExoPlayer.STATE_READY) && playWhenReady){
+            mStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
+                    mPlayer.getCurrentPosition(), 1f);
+        } else if((playbackState == ExoPlayer.STATE_READY)){
+            mStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED,
+                    mPlayer.getCurrentPosition(), 1f);
+        }
+        mMediaSession.setPlaybackState(mStateBuilder.build());
+    }
+
+    @Override
+    public void onRepeatModeChanged(int repeatMode) {
+
+    }
+
+    @Override
+    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {
+
+    }
+
+    @Override
+    public void onPositionDiscontinuity(int reason) {
+
+    }
+
+    @Override
+    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+    }
+
+    @Override
+    public void onSeekProcessed() {
+
+    }
+
+    private class MySessionCallback extends MediaSessionCompat.Callback {
+        @Override
+        public void onPlay() {
+            mPlayer.setPlayWhenReady(true);
+        }
+
+        @Override
+        public void onPause() {
+            mPlayer.setPlayWhenReady(false);
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            mPlayer.seekTo(0);
+        }
     }
 }
