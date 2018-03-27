@@ -20,6 +20,7 @@ This app makes use of the following external libraries and resources
 * View binding using ButterKnife https://github.com/JakeWharton/butterknife
 * RecyclerView animations by https://github.com/wasabeef/recyclerview-animators
 * ExoPlayer for playing video https://github.com/google/ExoPlayer
+* Some vector icons used in this app is downloaded from https://flaticons.com [Many thanks to the designers]
 
 To companies (I am for hire). This app features or uses the following components of android
 --------------------------------------------------------------------------------------------
