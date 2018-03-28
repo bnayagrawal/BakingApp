@@ -1,6 +1,8 @@
 package xyz.bnayagrawal.android.bakingapp;
 
 import android.content.Intent;
+import android.support.test.espresso.contrib.RecyclerViewActions;
+import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -15,6 +17,7 @@ import xyz.bnayagrawal.android.bakingapp.model.Recipe;
 import xyz.bnayagrawal.android.bakingapp.model.Step;
 
 import static android.support.test.espresso.Espresso.onData;
+import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static org.hamcrest.Matchers.anything;
@@ -64,11 +67,8 @@ public class RecipeDetailsScreenTest {
 
     @Test
     public void clickRecipeStep_playVideoOrLaunchStepDetailsActivity() {
-        //I have added 2 as position because in mobile the "ingredients list"(position 0) and
-        //the "steps label" (position 1) are added as list headers, so first item in the list
-        //will be in "position 2"
-        onData(anything()).inAdapterView(withId(R.id.list_recipe_steps)).atPosition(2).perform(click());
-        //If you have to test this on tablet, then set the position value 1, because in tablet only the
-        //"steps label" is added as header to step list, so the position of first step in list will be 1
+        onView(ViewMatchers.withId(R.id.recycler_recipe_steps))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(1,
+                        click()));
     }
 }
