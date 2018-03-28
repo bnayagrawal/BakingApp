@@ -68,7 +68,7 @@ public class RecipeDetailsScreenTest {
     @Test
     public void clickRecipeStep_playVideoOrLaunchStepDetailsActivity() {
         onView(ViewMatchers.withId(R.id.recycler_recipe_steps))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(1,
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,
                         click()));
     }
 }
