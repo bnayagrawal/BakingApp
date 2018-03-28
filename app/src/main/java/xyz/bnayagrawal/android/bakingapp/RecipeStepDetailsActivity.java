@@ -2,22 +2,16 @@ package xyz.bnayagrawal.android.bakingapp;
 
 import android.content.res.Configuration;
 import android.graphics.PorterDuff;
-import android.os.PersistableBundle;
-import android.support.annotation.Nullable;
+import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.google.android.exoplayer2.Player;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,32 +50,37 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Bundle bundle = getIntent().getExtras();
-        if(bundle != null && bundle.containsKey(EXTRA_RECIPE)) {
+        if (bundle != null && bundle.containsKey(EXTRA_RECIPE)) {
             mRecipe = bundle.getParcelable(EXTRA_RECIPE);
             mCurrentStepNumber = bundle.getInt(EXTRA_STEP_NUMBER);
         } else {
             finish();
         }
 
-        mFragmentRecipeStepDetails = new RecipeStepDetailsFragment();
-        Step currentStep = mRecipe.getSteps().get(mCurrentStepNumber);
-        bundle = new Bundle();
-        bundle.putBoolean(RecipeStepDetailsFragment.ARGUMENT_IS_PLAYED_IN_TABLET,false);
-        bundle.putString(RecipeStepDetailsFragment.ARGUMENT_STEP_INSTRUCTION,currentStep.getDescription());
-        bundle.putString(RecipeStepDetailsFragment.ARGUMENT_VIDEO_INSTRUCTION_URL,currentStep.getVideoURL());
-        bundle.putString(RecipeStepDetailsFragment.ARGUMENT_STEP_IMAGE_URL,currentStep.getThumbnailURL());
-        mFragmentRecipeStepDetails.setArguments(bundle);
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.layout_recipe_step_details_container, mFragmentRecipeStepDetails, FRAGMENT_RECIPE_STEP_DETAILS_TAG)
-                .commit();
+        if (null == savedInstanceState) {
+            mFragmentRecipeStepDetails = new RecipeStepDetailsFragment();
+            Step currentStep = mRecipe.getSteps().get(mCurrentStepNumber);
+            bundle = new Bundle();
+            bundle.putBoolean(RecipeStepDetailsFragment.ARGUMENT_IS_PLAYED_IN_TABLET, false);
+            bundle.putString(RecipeStepDetailsFragment.ARGUMENT_STEP_INSTRUCTION, currentStep.getDescription());
+            bundle.putString(RecipeStepDetailsFragment.ARGUMENT_VIDEO_INSTRUCTION_URL, currentStep.getVideoURL());
+            bundle.putString(RecipeStepDetailsFragment.ARGUMENT_STEP_IMAGE_URL, currentStep.getThumbnailURL());
+            mFragmentRecipeStepDetails.setArguments(bundle);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.layout_recipe_step_details_container, mFragmentRecipeStepDetails, FRAGMENT_RECIPE_STEP_DETAILS_TAG)
+                    .commit();
+        } else {
+            mFragmentRecipeStepDetails = (RecipeStepDetailsFragment) getSupportFragmentManager()
+                    .findFragmentByTag(FRAGMENT_RECIPE_STEP_DETAILS_TAG);
+        }
 
         updatePaginationText();
         updateButtonAction();
 
-        if(isLandscape()){
+        if (isLandscape()) {
             mNavigationContainer.setVisibility(View.GONE);
             ActionBar actionBar = getSupportActionBar();
-            if(null != actionBar) actionBar.hide();
+            if (null != actionBar) actionBar.hide();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
@@ -89,7 +88,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == android.R.id.home) {
+        if (item.getItemId() == android.R.id.home) {
             onBackPressed();
             return true;
         }
@@ -97,25 +96,18 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable(EXTRA_RECIPE,mRecipe);
-        outState.putInt(EXTRA_STEP_NUMBER,mCurrentStepNumber);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         ActionBar actionBar = getSupportActionBar();
-        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             mNavigationContainer.setVisibility(View.GONE);
-            if(null != actionBar) actionBar.hide();
+            if (null != actionBar) actionBar.hide();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
         } else {
             mNavigationContainer.setVisibility(View.VISIBLE);
             updatePaginationText();
-            if(null != actionBar) actionBar.show();
+            if (null != actionBar) actionBar.show();
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
@@ -123,12 +115,12 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
 
     private void updateButtonAction() {
         //For previous page
-        if(mCurrentStepNumber == 0) {
+        if (mCurrentStepNumber == 0) {
             mImageButtonPrevious.setColorFilter(
                     ContextCompat.getColor(RecipeStepDetailsActivity.this, R.color.buttonDisabled),
                     PorterDuff.Mode.MULTIPLY);
             mImageButtonPrevious.setOnClickListener(null);
-        } else if(mCurrentStepNumber > 0 && mCurrentStepNumber <= mRecipe.getSteps().size()){
+        } else if (mCurrentStepNumber > 0 && mCurrentStepNumber <= mRecipe.getSteps().size()) {
             mImageButtonPrevious.setColorFilter(null);
             mImageButtonPrevious.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -146,7 +138,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
         }
 
         //For next page
-        if(mCurrentStepNumber != (mRecipe.getSteps().size() - 1)) {
+        if (mCurrentStepNumber != (mRecipe.getSteps().size() - 1)) {
             mImageButtonNext.setColorFilter(null);
             mImageButtonNext.setOnClickListener(new View.OnClickListener() {
                 @Override

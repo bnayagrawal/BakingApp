@@ -91,13 +91,13 @@ public class RecipeDetailsActivity extends AppCompatActivity
 
     @Override
     public void onRecipeStepClicked(int position) {
+        mFragmentRecipeDetails.setSelectedItemPosition(position);
         if (!mIsTwoPane) {
             Intent intent = new Intent(this, RecipeStepDetailsActivity.class);
             intent.putExtra(RecipeStepDetailsActivity.EXTRA_STEP_NUMBER, position);
             intent.putExtra(RecipeStepDetailsActivity.EXTRA_RECIPE, mRecipe);
             startActivity(intent);
         } else {
-            mFragmentRecipeDetails.setSelectedItemPosition(position);
             mFragmentRecipeStepDetails.updateInstructions(
                     mRecipe.getSteps().get(position).getDescription(),
                     mRecipe.getSteps().get(position).getVideoURL()
