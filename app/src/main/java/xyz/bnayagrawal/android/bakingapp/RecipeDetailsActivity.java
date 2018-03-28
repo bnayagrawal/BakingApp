@@ -9,11 +9,11 @@ import android.widget.FrameLayout;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import xyz.bnayagrawal.android.bakingapp.adapter.RecipeStepsListAdapter;
+import xyz.bnayagrawal.android.bakingapp.adapter.RecipeStepsRecyclerAdapter;
 import xyz.bnayagrawal.android.bakingapp.model.Recipe;
 
 public class RecipeDetailsActivity extends AppCompatActivity
-        implements RecipeStepsListAdapter.OnRecipeStepClickListener {
+        implements RecipeStepsRecyclerAdapter.OnRecipeStepClickListener {
 
     private static final String TAG = RecipeDetailsActivity.class.getSimpleName();
     private static final String FRAGMENT_RECIPE_DETAILS_TAG = "fragment_recipe_details";

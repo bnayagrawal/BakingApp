@@ -2,6 +2,7 @@ package xyz.bnayagrawal.android.bakingapp;
 
 import android.content.res.Configuration;
 import android.graphics.PorterDuff;
+import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
@@ -93,6 +94,13 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(EXTRA_RECIPE,mRecipe);
+        outState.putInt(EXTRA_STEP_NUMBER,mCurrentStepNumber);
+        super.onSaveInstanceState(outState);
     }
 
     @Override

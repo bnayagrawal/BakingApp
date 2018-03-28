@@ -128,14 +128,14 @@ public class RecipeStepDetailsFragment extends Fragment
                     .height = ViewGroup.LayoutParams.MATCH_PARENT;
         }
 
-        initializeMediaSession();
-        initExoPlayer();
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        initializeMediaSession();
+        initExoPlayer();
         //This if statement may be a little confusing. But this is to
         //prevent calling updateContents when this fragment is first
         //instantiated by RecipeDetailsActivity to display in tablet.
@@ -153,14 +153,6 @@ public class RecipeStepDetailsFragment extends Fragment
         if(mPlayer != null) {
             mElapsedTime = mPlayer.getCurrentPosition();
             mIsPlayWhenReady = mPlayer.getPlayWhenReady();
-            mPlayer.stop();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if(mPlayer != null) {
             mPlayer.stop();
             mPlayer.release();
             mPlayer = null;
