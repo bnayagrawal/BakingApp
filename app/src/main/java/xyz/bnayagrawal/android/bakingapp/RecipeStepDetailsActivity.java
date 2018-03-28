@@ -68,6 +68,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
         bundle.putBoolean(RecipeStepDetailsFragment.ARGUMENT_IS_PLAYED_IN_TABLET,false);
         bundle.putString(RecipeStepDetailsFragment.ARGUMENT_STEP_INSTRUCTION,currentStep.getDescription());
         bundle.putString(RecipeStepDetailsFragment.ARGUMENT_VIDEO_INSTRUCTION_URL,currentStep.getVideoURL());
+        bundle.putString(RecipeStepDetailsFragment.ARGUMENT_STEP_IMAGE_URL,currentStep.getThumbnailURL());
         mFragmentRecipeStepDetails.setArguments(bundle);
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.layout_recipe_step_details_container, mFragmentRecipeStepDetails, FRAGMENT_RECIPE_STEP_DETAILS_TAG)

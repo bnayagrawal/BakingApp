@@ -27,4 +27,18 @@
         app:layout_constraintTop_toBottomOf="@+id/playerView"
         tools:text="Instructions" />
 
+    <ImageView
+        android:id="@+id/image_recipe_step"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/recipe_image_content_description"
+        android:scaleType="fitXY"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/playerView"
+        app:layout_constraintLeft_toLeftOf="@+id/playerView"
+        app:layout_constraintRight_toRightOf="@+id/playerView"
+        app:layout_constraintTop_toTopOf="@+id/playerView"
+        app:srcCompat="@drawable/recipe_placeholder" />
+
 </android.support.constraint.ConstraintLayout>
