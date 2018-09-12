@@ -22,7 +22,7 @@ This app makes use of the following external libraries and resources
 * ExoPlayer for playing video https://github.com/google/ExoPlayer
 * Some vector icons used in this app is downloaded from https://flaticons.com [Many thanks to the designers]
 
-To companies (I am for hire). This app features or uses the following components of android
+This app features or uses the following components of android
 --------------------------------------------------------------------------------------------
 * This app handles Activity and Fragment lifeCycles.
 * This app maintains instanceState on configuration change (Activity and Fragment).
